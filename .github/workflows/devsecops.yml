@@ -44,7 +44,6 @@ jobs:
         with:
           directory: ./terraform
           framework: terraform
-          output_format: cli
 
   # 2. BUILD & PUSH ZU DOCKER HUB
   build-and-push:

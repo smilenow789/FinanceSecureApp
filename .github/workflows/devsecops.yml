@@ -88,7 +88,7 @@ jobs:
         with:
           target: ${{ steps.deploy-test.outputs.url }}
           fail_action: true
-          issue_title: ''
+          cmd_options: '-I'
 
   # 4. DEPLOY PRODUKTIV-UMGEBUNG (NUR MAIN-BRANCH)
   deploy-prod:

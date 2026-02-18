@@ -12,7 +12,7 @@ permissions:
 # Globale Variablen für das Docker-Image und GCP
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USER }}/financesecureapp:${{ github.sha }}
-  GCP_REGION: europe-west1
+  GCP_REGION: us-central1
 
 jobs:
   # SECURITY GATES (SAST & IaC)

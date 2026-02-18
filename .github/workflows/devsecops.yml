@@ -88,6 +88,7 @@ jobs:
           target: ${{ steps.deploy-test.outputs.url }}
           fail_action: true
           cmd_options: '-I'
+          rules_file_name: '.zap/rules.tsv'
 
   # 4. DEPLOY PRODUKTIV-UMGEBUNG (NUR MAIN-BRANCH)
   deploy-prod:

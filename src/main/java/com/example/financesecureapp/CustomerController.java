@@ -58,10 +58,17 @@ public class CustomerController {
     }
 
     // ENDPUNKT ZUR SIMULATION VON FEHLGESCHLAGENEN LOGINS
+// ENDPUNKT ZUR SIMULATION VON FEHLGESCHLAGENEN LOGINS
     @PostMapping("/api/login")
     public String login(@RequestParam String username, @RequestParam String password) {
-        // Simulation, dass das Passwort immer falsch ist
-        logger.warn("SECURITY ALERT: Fehlgeschlagener Login-Versuch für User: {}", username);
+
+        // SCHWACHSTELLE 6 BEHOBEN: CRLF Injection in Logs verhindern (Input Sanitisierung)
+        // Zeilenumbrüche (\r und \n) durch einen Unterstrich (_) ersetzen
+        String sanitizedUsername = username != null ? username.replaceAll("[\r\n]", "_") : "unknown";
+
+        // Simulation, dass das Passwort immer falsch ist.
+        logger.warn("SECURITY ALERT: Fehlgeschlagener Login-Versuch für User: {}", sanitizedUsername);
+
         return "Login fehlgeschlagen!";
     }
 

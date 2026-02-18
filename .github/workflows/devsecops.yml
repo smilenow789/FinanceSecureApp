@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
 
-# Globale Variablen für das Docker-Image und die GCP-Region
+# Globale Variablen für das Docker-Image und GCP
 env:
   IMAGE_NAME: ${{ secrets.DOCKER_USER }}/financesecureapp:${{ github.sha }}
   GCP_REGION: europe-west1
@@ -26,7 +26,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: SpotBugs SAST (Findet SQL Injections)
+      - name: SpotBugs SAST
         run: mvn -B clean verify
 
       - name: Semgrep SAST (Findet Secrets)
@@ -36,7 +36,7 @@ jobs:
         env:
           SEMGREP_APP_TOKEN: "" # Lokal, kein SaaS
 
-      - name: Checkov IaC Scan (Prüft terraform/main.tf)
+      - name: Checkov IaC Scan
         uses: bridgecrewio/checkov-action@master
         with:
           directory: ./terraform
@@ -44,7 +44,7 @@ jobs:
 
   # 2. BUILD & PUSH ZU DOCKER HUB
   build-and-push:
-    needs: security-scans # Läuft nur, wenn SAST & Checkov bestanden sind!
+    needs: security-scans
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -13,6 +13,11 @@ import java.sql.SQLException;
 @RestController
 public class CustomerController {
 
+    @GetMapping("/")
+    public String healthCheck() {
+        return "Finance App ist online und sicher!";
+    }
+
     // SCHWACHSTELLE 1 BEHOBEN: Das hartcodierte Passwort (API_SECRET) wurde komplett entfernt.
 
     @GetMapping("/api/customer")

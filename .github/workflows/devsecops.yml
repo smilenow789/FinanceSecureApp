@@ -5,6 +5,9 @@ on:
     branches: [ "main", "feature**" ]
   pull_request:
     branches: [ "main" ]
+permissions:
+  contents: read
+  issues: write
 
 # Globale Variablen für das Docker-Image und GCP
 env:
@@ -41,6 +44,7 @@ jobs:
         with:
           directory: ./terraform
           framework: terraform
+          output_format: cli
 
   # 2. BUILD & PUSH ZU DOCKER HUB
   build-and-push:
@@ -79,11 +83,12 @@ jobs:
           region: ${{ env.GCP_REGION }}
           flags: '--allow-unauthenticated'
 
-      - name: OWASP ZAP DAST Scan (Prüft die echte Test-URL)
+      - name: OWASP ZAP DAST Scan
         uses: zaproxy/action-baseline@v0.14.0
         with:
           target: ${{ steps.deploy-test.outputs.url }}
           fail_action: true
+          issue_title: ''
 
   # 4. DEPLOY PRODUKTIV-UMGEBUNG (NUR MAIN-BRANCH)
   deploy-prod:

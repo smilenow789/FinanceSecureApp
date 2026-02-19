@@ -2,7 +2,7 @@
 
 resource "google_cloud_run_service" "finance_app" {
   name     = "finance-secure-app"
-  location = "us-central1"
+  location = "europe-west1"
 
   template {
     spec {

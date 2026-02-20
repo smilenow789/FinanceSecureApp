@@ -47,7 +47,7 @@ jobs:
 
       # Anforderung 2: IaC-Scanning
       - name: Checkov IaC Scan
-        uses: bridgecrewio/checkov-action@v3
+        uses: bridgecrewio/checkov-action@master
         with:
           directory: ./terraform
           framework: terraform

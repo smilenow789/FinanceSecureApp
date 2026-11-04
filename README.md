@@ -1,11 +1,6 @@
 # FinanceSecureApp – DevSecOps-Pipeline mit GitHub Actions
 
-[![DevSecOps CI/CD](https://github.com/smilenow789/FinanceSecureApp/actions/workflows/devsecops.yml/badge.svg)](https://github.com/smilenow789/FinanceSecureApp/actions/workflows/devsecops.yml)
-
-Referenzprojekt für **Security in der CI/CD-Pipeline**: Jede Codeänderung wird automatisch auf
-Schwachstellen geprüft, als Container gebaut, in einer Testumgebung dynamisch angegriffen und erst
-danach produktiv gesetzt. Die Beispielanwendung (Spring Boot, Java 21) ist bewusst klein; der
-Schwerpunkt liegt auf der Pipeline und der Absicherung drumherum.
+Referenzprojekt für **Security in der CI/CD-Pipeline**. Jede Codeänderung wird automatisch auf Schwachstellen geprüft, als Container gebaut, in einer Testumgebung mit automatisierten Angriffen getestet und erst danach produktiv gesetzt. Die Beispielanwendung (Spring Boot, Java 21) ist bewusst klein, der Schwerpunkt liegt auf der Pipeline.
 
 ## Pipeline
 
@@ -15,7 +10,7 @@ flowchart LR
     subgraph B[1 · Security Gates]
         direction TB
         B1[SpotBugs + FindSecBugs<br/>SAST, mvn verify]
-        B2[Semgrep p/java<br/>SAST, Secrets]
+        B2[Semgrep<br/>SAST, Secrets]
         B3[Checkov<br/>IaC, Terraform]
     end
     B --> C[2 · Docker-Image bauen<br/>und zu Docker Hub pushen]
@@ -25,12 +20,14 @@ flowchart LR
 
 | Stufe | Werkzeug | Zweck | Bei Fund |
 |---|---|---|---|
-| 1 | SpotBugs + FindSecBugs | statische Analyse des Java-Codes (u. a. SQL-/Log-Injection, Ressourcenlecks) | Build bricht ab |
-| 1 | Semgrep (`p/java`) | statische Analyse, hartcodierte Geheimnisse | Build bricht ab |
-| 1 | Checkov | Prüfung der Terraform-Definition (`terraform/`) | Build bricht ab |
-| 2 | Docker (Multi-Stage) | schlankes Laufzeit-Image, Tag = Commit-SHA | – |
-| 3 | OWASP ZAP (Baseline) | dynamischer Test gegen die laufende Testumgebung | Build bricht ab |
+| 1 | SpotBugs + FindSecBugs | statische Analyse des Java-Codes (u. a. SQL-Injection) | Build bricht ab |
+| 1 | Semgrep | statische Analyse, hartcodierte Geheimnisse | Build bricht ab |
+| 1 | Checkov | Prüfung der Terraform-Definition | Build bricht ab |
+| 2 | Docker | Container-Image bauen | – |
+| 3 | OWASP ZAP | Tests gegen die laufende Testumgebung | Build bricht ab |
 | 4 | Cloud Run | Produktivsetzung, **nur vom `main`-Branch** | – |
+
+**SAST** (Static Application Security Testing) untersucht den Quellcode, ohne ihn auszuführen. **DAST** (Dynamic Application Security Testing) testet die laufende Anwendung von aussen, indem typische Angriffe und Prüfungen automatisch gegen die Testumgebung ausgeführt werden.
 
 Die Pipeline läuft bei Pushes auf `main` und `feature**` sowie bei Pull Requests auf `main`
 (`.github/workflows/devsecops.yml`).
@@ -72,29 +69,10 @@ sind die Fixes kommentiert:
 |---|---|
 | Hartcodiertes Passwort/Secret | entfernt, Zugangsdaten aus Umgebungsvariablen |
 | SQL-Injection | `PreparedStatement` mit Parametern |
-| Ressourcenleck bei DB-Verbindung | try-with-resources |
 | Ungeprüfter Rückgabewert | `ResultSet` wird ausgewertet |
-| Log-Injection (CRLF) im Login-Log | Zeilenumbrüche im Benutzernamen werden ersetzt |
-| Fehlende Security-Header (von ZAP gemeldet) | `SecurityHeaderFilter`: HSTS, `nosniff`, CORP, `Cache-Control` |
+| Log-Injection im Login-Log | Zeilenumbrüche im Benutzernamen werden ersetzt |
 
-## Endpunkte
 
-| Methode | Pfad | Beschreibung |
-|---|---|---|
-| GET | `/` | Health-Check |
-| GET | `/api/customer?customerId=…` | Kundenabfrage (H2, parametrisierte Query) |
-| POST | `/api/login` | simuliert fehlgeschlagene Logins und schreibt einen Security-Alert ins Log |
-
-## Lokal ausführen
-
-```bash
-./mvnw verify                      # Build, Tests, SpotBugs
-docker build -t financesecureapp .
-docker run -p 8080:8080 financesecureapp
-```
-
-Für die vollständige Pipeline sind die Repository-Secrets `DOCKER_USER`, `DOCKER_PASSWORD` und
-`GCP_SERVICE_ACCOUNT` nötig; ohne sie laufen nur die Security-Scans.
 
 ## Projektstruktur
 
@@ -105,3 +83,5 @@ terraform/main.tf                 Cloud-Run-Definition, von Checkov geprüft
 Dockerfile                        Multi-Stage-Build
 src/                              Spring-Boot-Anwendung
 ```
+Für die vollständige Pipeline sind die Repository-Secrets `DOCKER_USER`, `DOCKER_PASSWORD` und
+`GCP_SERVICE_ACCOUNT` nötig.

@@ -7,7 +7,7 @@ resource "google_cloud_run_service" "finance_app" {
   template {
     spec {
       containers {
-        image = "docker.io/smilenwo789/financesecureapp:latest"
+        image = "docker.io/smilenow789/financesecureapp:latest"
       }
     }
   }
